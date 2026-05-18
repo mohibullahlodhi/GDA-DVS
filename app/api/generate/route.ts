@@ -3,7 +3,7 @@ import {
   stampUploadedDocument,
   type Department,
 } from "@/lib/document-processing";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const runtime = "nodejs";
 
@@ -40,6 +40,14 @@ export async function POST(request: Request) {
         : defaultDepartment;
 
     const result = await stampUploadedDocument(uploadedFile, department);
+    const supabaseAdmin = getSupabaseAdmin();
+
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: "Missing Supabase environment variables." },
+        { status: 500 },
+      );
+    }
 
     const storagePath = buildStoragePath(result.documentId, result.fileName);
     const { error: uploadError } = await supabaseAdmin.storage
@@ -59,7 +67,9 @@ export async function POST(request: Request) {
     const issueDate = String(formData.get("issueDate") ?? "");
     const expiryDate = String(formData.get("expiryDate") ?? "");
 
-    const { error: insertError } = await supabaseAdmin.from("documents").insert({
+    const documentsTable = supabaseAdmin.from("documents") as any;
+
+    const { error: insertError } = await documentsTable.insert({
       id: result.documentId,
       department,
       title,
