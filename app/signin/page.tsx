@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getSupabaseClient } from "../../lib/supabaseClient";
+import { Footer } from "@/components/ui/footer";
 
 export default function SignInPage() {
   const supabase = getSupabaseClient();
@@ -59,7 +60,8 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md p-6">
+    <>
+      <div className="mx-auto max-w-md p-6">
       <h1 className="mb-4 text-2xl font-bold">Officer Login</h1>
 
       <form className="space-y-4" onSubmit={signInWithPassword}>
@@ -126,6 +128,8 @@ export default function SignInPage() {
       </div>
 
       {message && <div className="mt-4 rounded-md bg-gray-50 p-3 text-sm">{message}</div>}
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseClient } from "../../../lib/supabaseClient";
+import { Footer } from "@/components/ui/footer";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -34,5 +35,10 @@ export default function AuthCallbackPage() {
     handle();
   }, [router]);
 
-  return <div className="mx-auto max-w-md p-6">Signing you in...</div>;
+  return (
+    <>
+      <div className="mx-auto max-w-md p-6">Signing you in...</div>
+      <Footer />
+    </>
+  );
 }

@@ -1,189 +1,138 @@
+﻿"use client";
+
 import Link from "next/link";
 import {
   ArrowRight,
-  Barcode,
-  FileUp,
-  ScanLine,
-  ShieldCheck,
 } from "lucide-react";
+import { BackgroundPaths } from "@/components/ui/background-paths";
+import { Footer } from "@/components/ui/footer";
+import { GetInTouch } from "@/components/ui/get-in-touch";
 
 const workflowSteps = [
   {
     id: "01",
-    icon: FileUp,
     title: "Upload Document",
     description: "Upload your official PDF or DOCX document to the system.",
   },
   {
     id: "02",
-    icon: Barcode,
     title: "Barcode Generated",
     description:
       "A unique Code128 barcode and document ID are embedded into your document automatically.",
   },
   {
     id: "03",
-    icon: ScanLine,
     title: "Scan & Verify",
     description:
       "Anyone can scan the barcode or enter the document ID to instantly verify authenticity.",
   },
 ];
 
-const stats = [
-  { value: "10,000+", label: "Documents Authenticated" },
-  { value: "15+", label: "Government Departments" },
-  { value: "100%", label: "Verification Accuracy" },
-];
-
-const footerLinks = [
-  { label: "Home", href: "/" },
-  { label: "Verify Document", href: "/verify" },
-  { label: "Contact", href: "#contact" },
-];
-
 export default function Home() {
   return (
-    <div className="animate-fade-in-up">
-      <section className="relative overflow-hidden bg-[#F8FAF9]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(27,67,50,0.08),_transparent_42%),linear-gradient(rgba(248,250,249,0.96),rgba(248,250,249,0.96))]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(27,67,50,0.08)_1px,transparent_0)] [background-size:24px_24px] opacity-40" />
-        <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 sm:pb-24 sm:pt-20 lg:px-8 lg:pb-28 lg:pt-24">
-          <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-1 text-xs font-medium text-green-800 shadow-sm">
-              <ShieldCheck className="h-4 w-4" />
-              Pakistan Government — Official System
-            </div>
-            <h1 className="mt-6 max-w-4xl text-4xl font-extrabold tracking-tight text-[#1A1A1A] sm:text-6xl">
-              Authenticate. Verify. Trust.
-            </h1>
-            <p className="mt-5 max-w-[520px] text-base leading-8 text-gray-500 sm:text-lg">
-              GDAVS ensures every government-issued document is uniquely
-              identified, barcode-stamped, and instantly verifiable by anyone.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/generate"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1B4332] px-6 py-3 text-sm font-medium text-white transition-all hover:bg-[#40916C]"
-              >
-                Generate Document
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                href="/verify"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#1B4332] px-6 py-3 text-sm font-medium text-[#1B4332] transition-all hover:bg-[#D8F3DC]"
-              >
-                <ScanLine className="h-4 w-4" />
-                Verify Document
-              </Link>
-            </div>
-            <p className="mt-4 text-sm text-gray-500">
-              No login required for document verification
-            </p>
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]" data-workflow-steps={workflowSteps.length}>
+      <style jsx global>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmer {
+          0%   { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.85); }
+          to   { opacity: 1; transform: scale(1); }
+        }
+        @keyframes borderPulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
+          50%      { box-shadow: 0 0 0 6px rgba(201,168,76,0.08); }
+        }
+        @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+
+        .animate-fade-in-up { opacity: 0; animation: fadeInUp 0.7s cubic-bezier(0.4,0,0.2,1) forwards; }
+        .animate-scale-in { opacity: 0; animation: scaleIn 0.6s cubic-bezier(0.4,0,0.2,1) forwards; }
+        .animate-shimmer { background: linear-gradient(90deg, var(--color-accent) 25%, #f0d080 50%, var(--color-accent) 75%); background-size: 200% auto; animation: shimmer 2.5s linear infinite; }
+        .animate-border-pulse { animation: borderPulse 2.5s ease-in-out infinite; }
+        .dot-pulse { animation: pulse 1.8s ease-in-out infinite; }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+
+        .playfair { font-family: 'Playfair Display', serif; }
+        .dmsans { font-family: 'DM Sans', sans-serif; }
+
+        .hero-grid-overlay {
+          background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 24px);
+        }
+
+        .lift-hover {
+          transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .lift-hover:hover {
+          transform: translateY(-4px) scale(1.02);
+          box-shadow: 0 18px 45px rgba(13, 43, 31, 0.18);
+        }
+
+        .tilt-3d {
+          transform-style: preserve-3d;
+          perspective: 1200px;
+        }
+
+        .tilt-3d:hover {
+          transform: translateY(-4px) rotateX(5deg) rotateY(-6deg);
+        }
+
+        .glow-hover {
+          transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .glow-hover:hover {
+          box-shadow: 0 0 0 1px rgba(201,168,76,0.25), 0 14px 30px rgba(0,0,0,0.15);
+        }
+      `}</style>
+
+      {/* HERO */}
+      <section className="relative flex items-center justify-center overflow-hidden text-center" style={{ minHeight: '88vh', backgroundColor: '#2E7D32' }}>
+        <BackgroundPaths mode="background" className="opacity-100" />
+
+        <div className="relative z-10 mx-auto px-6" style={{ maxWidth: 720 }}>
+          <h1 className="playfair text-white animate-fade-in-up" style={{ fontSize: 'clamp(3.25rem, 8vw, 4.5rem)', lineHeight: 1, marginBottom: 12 }}>
+            <span className="block">Authenticate.</span>
+            <span className="block">Verify.</span>
+            <span className="block" style={{ color: 'var(--color-accent)' }}>Trust.</span>
+            <span className="mx-auto mt-4 block h-[3px] w-[60px] animate-shimmer rounded-full" />
+          </h1>
+
+          <div className="mx-auto mt-6 animate-fade-in-up delay-100 dmsans" style={{ maxWidth: 560, color: 'rgba(255,255,255,0.78)', fontSize: 16, lineHeight: 1.8 }}>
+            The Galiyat Development Authority Document Verification System ensures every official document is uniquely identified, barcode-authenticated, and instantly verifiable — protecting citizens and institutions alike.
+          </div>
+
+          <div className="mt-8 flex items-center justify-center gap-4 animate-fade-in-up delay-200">
+            <Link href="/generate" className="group lift-hover tilt-3d inline-flex items-center gap-3 rounded-xl px-7 py-3.5 playfair" style={{ background: '#C9A84C', color: '#0B1F33', fontWeight: 600, transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)' }}>
+              <span>Generate Document</span>
+              <ArrowRight size={16} className="transition-colors duration-300 group-hover:text-white" />
+            </Link>
+
+            <Link href="/verify" className="group lift-hover tilt-3d inline-flex items-center gap-3 rounded-xl px-7 py-3.5 dmsans" style={{ background: 'transparent', border: '1.5px solid rgba(255,255,255,0.26)', color: '#fff', transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)' }}>
+              <span>Verify Document</span>
+            </Link>
+          </div>
+
+          <div className="mt-6 flex items-center justify-center gap-2 text-[13px] dmsans animate-fade-in-up delay-300" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            <span>No login required for public document verification</span>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-[#1A1A1A] sm:text-[32px]">
-            How It Works
-          </h2>
-        </div>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {workflowSteps.map((step) => {
-            const Icon = step.icon;
+      {/* GET IN TOUCH */}
+      <GetInTouch />
 
-            return (
-              <article
-                key={step.id}
-                className="relative rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-md"
-              >
-                <span className="absolute left-6 top-6 rounded-full bg-[#D8F3DC] px-3 py-1 text-xs font-semibold tracking-wide text-[#1B4332]">
-                  {step.id}
-                </span>
-                <div className="mt-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-green-50 text-[#1B4332]">
-                  <Icon className="h-10 w-10" />
-                </div>
-                <h3 className="mt-5 text-xl font-bold text-[#1A1A1A]">
-                  {step.title}
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-gray-500">
-                  {step.description}
-                </p>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="bg-[#1B4332] px-4 py-16 text-white sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-3">
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-5xl font-bold tracking-tight">{stat.value}</div>
-              <div className="mt-2 text-sm opacity-80">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section
-        id="contact"
-        className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20"
-      >
-        <div className="grid gap-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:grid-cols-[1.2fr_0.8fr] lg:p-8">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-              Contact
-            </p>
-            <h2 className="mt-2 text-2xl font-bold text-[#1A1A1A]">
-              Government support and department onboarding
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-500">
-              GDAVS is designed for secure document issuance across ministries,
-              departments, and public verification points.
-            </p>
-          </div>
-          <div className="grid gap-3 text-sm text-gray-600 sm:grid-cols-2 lg:grid-cols-1">
-            <div className="rounded-xl bg-[#F8FAF9] p-4">
-              <p className="font-medium text-[#1A1A1A]">Support</p>
-              <p className="mt-1">support@gdavs.gov.pk</p>
-            </div>
-            <div className="rounded-xl bg-[#F8FAF9] p-4">
-              <p className="font-medium text-[#1A1A1A]">Government Helpdesk</p>
-              <p className="mt-1">+92 51 0000000</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer className="bg-[#1A1A1A] px-4 py-10 text-white sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 md:flex-row md:items-start md:justify-between">
-          <div className="max-w-md">
-            <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#1B4332] text-white">
-                <ShieldCheck className="h-5 w-5" />
-              </span>
-              <span className="text-lg font-bold tracking-tight">GDAVS</span>
-            </div>
-            <p className="mt-4 text-sm leading-7 text-white/75">
-              Official Document Authentication System — Government of Pakistan
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 text-sm text-white/80 md:items-end">
-            {footerLinks.map((link) => (
-              <Link key={link.label} href={link.href} className="transition hover:text-white">
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-        <div className="mx-auto mt-8 max-w-7xl border-t border-white/10 pt-6 text-sm text-white/60">
-          © 2026 GDAVS. All rights reserved. | Government of Pakistan
-        </div>
-      </footer>
+      {/* FOOTER */}
+      <Footer />
     </div>
   );
 }
+

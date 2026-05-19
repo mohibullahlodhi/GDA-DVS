@@ -15,7 +15,7 @@ export function AuthButton() {
     let mounted = true;
 
     async function load() {
-      // @ts-ignore
+      
       const { data } = await supabase.auth.getSession();
       if (!mounted) return;
       setEmail(data?.session?.user?.email ?? null);
@@ -29,7 +29,7 @@ export function AuthButton() {
 
     return () => {
       mounted = false;
-      // @ts-ignore
+      
       sub?.subscription?.unsubscribe?.();
     };
   }, [supabase]);
@@ -57,8 +57,8 @@ export function AuthButton() {
   }
 
   return (
-    <a href="/signin" className="rounded-xl border border-[#1B4332] px-3 py-2 text-xs font-medium text-[#1B4332] hover:bg-[#1B4332] hover:text-white">
-      Officer Login
+    <a href="/signin" className="rounded-xl border border-[rgba(201,168,76,0.6)] px-3 py-2 text-xs font-medium text-[var(--color-accent)] transition hover:bg-[var(--color-accent)] hover:text-[var(--color-deep)]">
+      Login
     </a>
   );
 }

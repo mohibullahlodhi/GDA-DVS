@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Footer } from "@/components/ui/footer";
 import type { ChangeEvent, DragEvent, FormEvent } from "react";
 
 type Department = "BCA" | "Education" | "Health" | "Police" | "Revenue" | "Transport";
@@ -200,7 +201,8 @@ export default function GenerateDocumentPage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+    <>
+      <div className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
       <section className="pt-10 sm:pt-14">
         <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
           Home → Generate Document
@@ -491,6 +493,8 @@ export default function GenerateDocumentPage() {
           </section>
         </div>
       </form>
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 }

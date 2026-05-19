@@ -9,9 +9,12 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
     "@supabase/supabase-js": "^2.106.0",
     "@types/jsbarcode": "^3.11.4",
     "bwip-js": "^4.10.1",
+    "class-variance-authority": "^0.7.1",
+    "framer-motion": "^12.39.0",
     "jsbarcode": "^3.12.3",
     "jszip": "^3.10.1",
     "lucide-react": "^1.16.0",
