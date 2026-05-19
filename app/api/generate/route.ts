@@ -4,11 +4,12 @@ import {
   type Department,
 } from "@/lib/document-processing";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { getOfficerContextByUserId } from "@/lib/officer-access";
 
 export const runtime = "nodejs";
 
 const defaultDepartment: Department = "BCA";
-const bucketName = "documents";
+const barcodeBucket = "documents";
 
 const validDepartments: Record<Department, true> = {
   BCA: true,
@@ -39,6 +40,18 @@ export async function POST(request: Request) {
         ? (departmentValue as Department)
         : defaultDepartment;
 
+    const processedBy = String(formData.get("processedBy") ?? "").trim();
+
+    if (!processedBy) {
+      return NextResponse.json({ error: "Officer authorization is required." }, { status: 401 });
+    }
+
+    const officerContext = await getOfficerContextByUserId(processedBy);
+
+    if (!officerContext || (!officerContext.canGenerate && !officerContext.isAdmin)) {
+      return NextResponse.json({ error: "You are not approved to generate documents yet." }, { status: 403 });
+    }
+
     const result = await stampUploadedDocument(uploadedFile, department);
     const supabaseAdmin = getSupabaseAdmin();
 
@@ -49,11 +62,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const storagePath = buildStoragePath(result.documentId, result.fileName);
+    // Instead of storing the full processed PDF/DOCX in Supabase storage,
+    // only store the barcode PNG to reduce storage usage. The processed file
+    // is still returned to the officer for download in the response.
+    const barcodePath = `${result.documentId}/gdavs-barcode.png`;
     const { error: uploadError } = await supabaseAdmin.storage
-      .from(bucketName)
-      .upload(storagePath, Buffer.from(result.buffer), {
-        contentType: result.contentType,
+      .from(barcodeBucket)
+      .upload(barcodePath, Buffer.from(result.barcodeBuffer), {
+        contentType: "image/png",
         upsert: false,
       });
 
@@ -67,6 +83,7 @@ export async function POST(request: Request) {
     const issueDate = String(formData.get("issueDate") ?? "");
     const expiryDate = String(formData.get("expiryDate") ?? "");
 
+
     const documentsTable = supabaseAdmin.from("documents") as any;
 
     const { error: insertError } = await documentsTable.insert({
@@ -76,11 +93,13 @@ export async function POST(request: Request) {
       recipient_name: recipientName,
       issue_date: issueDate || null,
       expiry_date: expiryDate || null,
-      storage_path: storagePath,
-      mime_type: result.contentType,
-      file_size: result.buffer.byteLength,
+      // store the barcode image path (stored in `documents` bucket)
+      storage_path: barcodePath,
+      mime_type: "image/png",
+      file_size: result.barcodeBuffer.byteLength,
       original_file_name: originalFileName,
       processed_file_name: result.fileName,
+      processed_by: processedBy,
     });
 
     if (insertError) {
@@ -94,7 +113,7 @@ export async function POST(request: Request) {
         "Content-Disposition": `attachment; filename="${result.fileName}"`,
         "X-Document-Id": result.documentId,
         "X-Output-Name": result.fileName,
-        "X-Storage-Path": storagePath,
+        "X-Storage-Path": barcodePath,
       },
     });
   } catch (error) {

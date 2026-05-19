@@ -36,6 +36,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ status: "invalid" });
   }
 
+  // The storage_path now points to the barcode image stored in the `documents` bucket.
   const { data: signedUrlData, error: signedUrlError } = await supabaseAdmin.storage
     .from("documents")
     .createSignedUrl((data as any).storage_path, 60);

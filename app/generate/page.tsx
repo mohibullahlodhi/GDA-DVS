@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Footer } from "@/components/ui/footer";
+import { getSupabaseClient } from "../../lib/supabaseClient";
+import { useRouter } from "next/navigation";
 import { BackgroundPaths } from "@/components/ui/background-paths";
 import type { ChangeEvent, DragEvent, FormEvent } from "react";
 
@@ -69,6 +71,10 @@ const defaultForm = {
 };
 
 export default function GenerateDocumentPage() {
+  const router = useRouter();
+  const supabase = getSupabaseClient();
+  const [authChecking, setAuthChecking] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [form, setForm] = useState(defaultForm);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -93,6 +99,39 @@ export default function GenerateDocumentPage() {
   );
 
   useEffect(() => {
+    // Check that the current user is an authenticated, approved officer or admin
+    (async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        const user = data?.user ?? null;
+
+        if (!user) {
+          router.replace("/signin");
+          return;
+        }
+
+        const res = await fetch(`/api/access/context?userId=${user.id}`);
+        const body = await res.json();
+
+        if (!body?.found) {
+          router.replace("/signin");
+          return;
+        }
+
+        if (!body.canGenerate && !body.isAdmin) {
+          router.replace("/pending");
+          return;
+        }
+
+        setCurrentUserId(user.id);
+      } catch (err) {
+        router.replace("/signin");
+        return;
+      } finally {
+        setAuthChecking(false);
+      }
+    })();
+
     if (!generatedDocument || !barcodeCanvasRef.current) {
       return;
     }
@@ -176,6 +215,9 @@ export default function GenerateDocumentPage() {
       payload.append("recipientName", form.recipientName);
       payload.append("issueDate", form.issueDate);
       payload.append("expiryDate", form.expiryDate);
+      if (currentUserId) {
+        payload.append("processedBy", currentUserId);
+      }
 
       const response = await fetch("/api/generate", {
         method: "POST",
@@ -209,6 +251,14 @@ export default function GenerateDocumentPage() {
       setIsGenerating(false);
     }
   };
+
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center text-[var(--color-text-soft)] font-dm-sans">
+        Checking access...
+      </div>
+    );
+  }
 
   return (
     <>

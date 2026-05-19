@@ -12,20 +12,77 @@ export default function AuthCallbackPage() {
     const supabase = getSupabaseClient();
 
     async function handle() {
-      // Extract session from the URL (magic link or OAuth redirect)
       try {
-        // @ts-ignore - supabase-js v2 method
-        const { data, error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
+        const currentUrl = new URL(window.location.href);
+        const code = currentUrl.searchParams.get("code");
 
-        if (error) {
-          console.error("Auth callback error:", error);
-          // Redirect to sign-in with error
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+          if (error) {
+            console.error("Auth callback error:", error);
+            router.replace("/signin");
+            return;
+          }
+        }
+
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+
+        if (userError || !userData?.user) {
           router.replace("/signin");
           return;
         }
 
-        // On success, navigate to the generate page for officers
-        router.replace("/generate");
+        const user = userData.user;
+        const userMetadata = (user.user_metadata ?? {}) as Record<string, string>;
+
+        try {
+          if (user?.id && user?.email) {
+            await fetch("/api/officers/complete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                userId: user.id,
+                email: user.email,
+                fullName: userMetadata.full_name ?? userMetadata.fullName ?? "",
+                designation: userMetadata.designation ?? "",
+                department: userMetadata.department ?? "BCA",
+                role: userMetadata.role ?? "officer",
+              }),
+            });
+          }
+        } catch (err) {
+          // ignore
+        }
+
+        const response = await fetch(`/api/access/context?userId=${user.id}`);
+        const context = await response.json().catch(() => null);
+
+        try {
+          await fetch("/api/access/login-log", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: user.id,
+              status: context?.isAdmin ? "admin" : context?.canGenerate ? "approved" : "pending",
+              userAgent: navigator.userAgent,
+            }),
+          });
+        } catch {
+          // ignore login log failures
+        }
+
+        if (context?.isAdmin) {
+          router.replace("/admin");
+          return;
+        }
+
+        if (context?.canGenerate) {
+          router.replace("/generate");
+          return;
+        }
+
+        router.replace("/pending");
       } catch (err) {
         console.error(err);
         router.replace("/signin");

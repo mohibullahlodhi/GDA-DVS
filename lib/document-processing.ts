@@ -1,11 +1,12 @@
 import bwipjs from "bwip-js";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import JSZip from "jszip";
 
 export type ProcessedDocument = {
   buffer: Uint8Array;
   contentType: string;
   fileName: string;
+  barcodeBuffer: Uint8Array;
   documentId: string;
 };
 
@@ -49,7 +50,7 @@ const buildOutputName = (fileName: string, documentId: string) => {
   return `${baseName}_${documentId}_stamped.${extension}`;
 };
 
-const stampPdf = async (input: ArrayBuffer, barcodeBuffer: Buffer) => {
+const stampPdf = async (input: ArrayBuffer, barcodeBuffer: Buffer, documentId: string) => {
   const pdfDoc = await PDFDocument.load(input);
   const barcodeImage = await pdfDoc.embedPng(barcodeBuffer);
   const firstPage = pdfDoc.getPages()[0];
@@ -76,6 +77,23 @@ const stampPdf = async (input: ArrayBuffer, barcodeBuffer: Buffer) => {
     height: drawHeight,
   });
 
+  // Draw the document ID below the barcode for human-readable verification
+  try {
+    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const textSize = 9;
+    const textY = drawY - (textSize + 4);
+
+    firstPage.drawText(documentId, {
+      x: drawX,
+      y: textY,
+      size: textSize,
+      font: helvetica,
+      color: rgb(0, 0, 0),
+    });
+  } catch {
+    // If font embedding fails, continue without text.
+  }
+
   return pdfDoc.save();
 };
 
@@ -84,6 +102,7 @@ const makeImageParagraph = (
   docPrId: number,
   widthEmu: number,
   heightEmu: number,
+  documentId?: string,
 ) => {
   return `
     <w:p>
@@ -121,10 +140,25 @@ const makeImageParagraph = (
         </w:drawing>
       </w:r>
     </w:p>
-  `.trim();
+  `.trim() +
+    (documentId
+      ? `
+    <w:p>
+      <w:pPr>
+        <w:jc w:val="right"/>
+        <w:rPr>
+          <w:sz w:val="18"/>
+        </w:rPr>
+      </w:pPr>
+      <w:r>
+        <w:t>${documentId}</w:t>
+      </w:r>
+    </w:p>
+  `
+      : "");
 };
 
-const stampDocx = async (input: Buffer, barcodeBuffer: Buffer) => {
+const stampDocx = async (input: Buffer, barcodeBuffer: Buffer, documentId: string) => {
   const zip = await JSZip.loadAsync(input);
 
   zip.file("word/media/gdavs-barcode.png", barcodeBuffer, { binary: true });
@@ -164,7 +198,7 @@ const stampDocx = async (input: Buffer, barcodeBuffer: Buffer) => {
   }
 
   const documentXml = await documentFile.async("string");
-  const barcodeBlock = makeImageParagraph(relationshipId, 101, 2400000, 420000);
+  const barcodeBlock = makeImageParagraph(relationshipId, 101, 2400000, 420000, documentId);
   const updatedXml = documentXml.replace("<w:body>", `<w:body>${barcodeBlock}`);
   zip.file("word/document.xml", updatedXml);
 
@@ -181,24 +215,26 @@ export const stampUploadedDocument = async (file: File, department: Department) 
   const barcodeBuffer = await createBarcodeBuffer(documentId);
 
   if (extension === "pdf") {
-    const stamped = await stampPdf(await file.arrayBuffer(), barcodeBuffer);
+    const stamped = await stampPdf(await file.arrayBuffer(), barcodeBuffer, documentId);
 
     return {
       buffer: stamped,
       contentType: "application/pdf",
       fileName: buildOutputName(file.name, documentId),
+      barcodeBuffer,
       documentId,
     } satisfies ProcessedDocument;
   }
 
   if (extension === "docx") {
-    const stamped = await stampDocx(Buffer.from(await file.arrayBuffer()), barcodeBuffer);
+    const stamped = await stampDocx(Buffer.from(await file.arrayBuffer()), barcodeBuffer, documentId);
 
     return {
       buffer: stamped,
       contentType:
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileName: buildOutputName(file.name, documentId),
+      barcodeBuffer,
       documentId,
     } satisfies ProcessedDocument;
   }
