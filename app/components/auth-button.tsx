@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { LogIn, LogOut, User } from "lucide-react";
 import { getSupabaseClient } from "../../lib/supabaseClient";
 
 export function AuthButton() {
@@ -11,11 +12,9 @@ export function AuthButton() {
   const router = useRouter();
 
   useEffect(() => {
-    // initial session
     let mounted = true;
 
     async function load() {
-      
       const { data } = await supabase.auth.getSession();
       if (!mounted) return;
       setEmail(data?.session?.user?.email ?? null);
@@ -29,7 +28,6 @@ export function AuthButton() {
 
     return () => {
       mounted = false;
-      
       sub?.subscription?.unsubscribe?.();
     };
   }, [supabase]);
@@ -43,22 +41,32 @@ export function AuthButton() {
 
   if (email) {
     return (
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-gray-700">{email}</span>
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-3 py-1.5">
+          <User size={13} className="text-[var(--color-accent)]" />
+          <span className="text-[11px] font-medium text-white/90 dmsans max-w-[120px] sm:max-w-[180px] truncate">
+            {email}
+          </span>
+        </div>
         <button
           onClick={signOut}
           disabled={loading}
-          className="rounded-xl border border-gray-200 px-3 py-1 text-sm"
+          className="flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs font-medium text-white/95 transition-all duration-300 hover:scale-[1.02] dmsans"
         >
-          Sign out
+          <LogOut size={12} />
+          <span>Sign out</span>
         </button>
       </div>
     );
   }
 
   return (
-    <a href="/signin" className="rounded-xl border border-[rgba(201,168,76,0.6)] px-3 py-2 text-xs font-medium text-[var(--color-accent)] transition hover:bg-[var(--color-accent)] hover:text-[var(--color-deep)]">
-      Login
+    <a
+      href="/signin"
+      className="flex items-center gap-1.5 rounded-lg border border-[rgba(201,168,76,0.5)] bg-[rgba(201,168,76,0.06)] hover:bg-[var(--color-accent)] px-4 py-2 text-xs font-semibold text-[var(--color-accent)] hover:text-[var(--color-deep)] transition-all duration-300 hover:-translate-y-0.5 dmsans"
+    >
+      <LogIn size={12} />
+      <span>Portal Sign In</span>
     </a>
   );
 }

@@ -9,8 +9,8 @@ const socialLinks = [
     href: "https://www.facebook.com/gdaabbottabad/",
     icon: (
       <svg
-        width="24"
-        height="24"
+        width="18"
+        height="18"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -30,8 +30,8 @@ const socialLinks = [
     href: "https://www.instagram.com/gdaabbottabad?igsh=MWwyMjZrYzNvMWE3NQ==",
     icon: (
       <svg
-        width="24"
-        height="24"
+        width="18"
+        height="18"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -58,8 +58,8 @@ const socialLinks = [
     href: "https://x.com/gdaabbottabad",
     icon: (
       <svg
-        width="24"
-        height="24"
+        width="18"
+        height="18"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -77,92 +77,95 @@ const socialLinks = [
 ];
 
 const quickLinks = [
-  { label: "Home", href: "/" },
-  { label: "Generate Document", href: "/generate" },
-  { label: "Verify Document", href: "/verify" },
-  { label: "About", href: "/about" },
+  { label: "Verify Document Portal", href: "/verify" },
+  { label: "Generate & Stamp Barcode", href: "/generate" },
+  { label: "Back to Home", href: "/" },
 ];
 
 export function Footer() {
   return (
     <footer
-      className="w-full"
+      className="w-full relative overflow-hidden border-t border-[rgba(201,168,76,0.18)]"
       style={{
         background: "linear-gradient(180deg, #0B1F33 0%, #051115 100%)",
         color: "#fff",
       }}
     >
-      {/* Main Footer */}
-      <div className="mx-auto max-w-7xl px-6 py-12">
+      {/* Top accent glow line */}
+      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[rgba(201,168,76,0.5)] to-transparent" />
+      
+      {/* Main Footer Container */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative z-10">
         <div className="grid gap-12 sm:grid-cols-3">
-          {/* Brand Section */}
-          <div>
-            <Link href="/" className="flex items-center gap-3">
+          
+          {/* Brand/Official Section */}
+          <div className="space-y-4">
+            <Link href="/" className="inline-flex items-center gap-3 transition-all duration-300 hover:opacity-90">
               <Image
                 src="/gda_logo.png"
                 alt="GDA Logo"
-                width={40}
-                height={40}
-                className="h-10 w-10 object-contain"
+                width={44}
+                height={44}
+                className="h-11 w-11 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]"
               />
-              <div>
+              <div className="leading-tight">
                 <div
-                  className="text-lg font-bold"
+                  className="text-lg font-bold tracking-wider text-white"
                   style={{
                     fontFamily: "'Playfair Display', serif",
-                    color: "#FFFFFF",
                   }}
                 >
                   GDA-DVS
                 </div>
-                <div className="text-[11px] text-white/60">
+                <div className="text-[10px] uppercase tracking-wider text-white/50 dmsans">
                   Document Verification System
                 </div>
               </div>
             </Link>
-            <p className="mt-4 text-sm leading-relaxed text-white/70">
-              Secure, transparent, and official document verification for the
-              Galiyat Development Authority.
+            <p className="text-sm leading-relaxed text-white/70 max-w-sm font-light dmsans">
+              Secure, transparent, and official document registry and barcode verification platform for the Galiyat Development Authority.
             </p>
           </div>
 
-          {/* Quick Links */}
-          <div>
+          {/* Quick Registry Links */}
+          <div className="space-y-4">
             <h3
-              className="text-sm font-semibold uppercase tracking-widest text-white/90"
-              style={{ color: "#C9A84C" }}
+              className="text-xs font-bold uppercase tracking-widest text-[var(--color-accent)] dmsans"
             >
-              Quick Links
+              Registry Actions
             </h3>
-            <nav className="mt-4 space-y-2">
+            <nav className="flex flex-col gap-3">
               {quickLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="block text-sm text-white/70 transition hover:text-[#C9A84C]"
+                  className="group inline-flex items-center gap-1.5 text-sm text-white/70 transition-all duration-300 hover:text-[var(--color-accent)] hover:translate-x-0.5 dmsans font-light"
                 >
-                  {link.label}
+                  <span className="opacity-0 transition-opacity duration-300 group-hover:opacity-100 text-[var(--color-accent)]">›</span>
+                  <span>{link.label}</span>
                 </Link>
               ))}
             </nav>
           </div>
 
-          {/* Social Links */}
-          <div>
+          {/* Institutional Contact & Social Links */}
+          <div className="space-y-4">
             <h3
-              className="text-sm font-semibold uppercase tracking-widest text-white/90"
-              style={{ color: "#C9A84C" }}
+              className="text-xs font-bold uppercase tracking-widest text-[var(--color-accent)] dmsans"
             >
-              Follow Us
+              Institutional Socials
             </h3>
-            <div className="mt-4 flex gap-4">
+            <p className="text-xs text-white/60 dmsans font-light leading-relaxed">
+              Connect with us via our official government public media handles for news and updates.
+            </p>
+            <div className="flex flex-wrap gap-3 pt-1">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(201,168,76,0.28)] text-white/70 transition hover:-translate-y-0.5 hover:border-[#C9A84C] hover:text-[#C9A84C]"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(201,168,76,0.5)] hover:bg-[rgba(201,168,76,0.12)] hover:text-[var(--color-accent)]"
                   title={social.name}
                 >
                   {social.icon}
@@ -170,27 +173,29 @@ export function Footer() {
               ))}
             </div>
           </div>
+          
         </div>
 
-        {/* Bottom Border */}
-        <div className="mt-8 border-t border-[rgba(201,168,76,0.15)] pt-8">
-          <div className="flex flex-col items-center justify-between gap-4 text-center text-xs text-white/60 sm:flex-row">
-            <div>
-              © 2026 Galiyat Development Authority. All rights reserved.
+        {/* Bottom Legal / Copyright Area */}
+        <div className="mt-16 pt-8 border-t border-white/5">
+          <div className="flex flex-col items-center justify-between gap-6 text-center text-xs text-white/50 sm:flex-row">
+            <div className="dmsans font-light">
+              © {new Date().getFullYear()} Galiyat Development Authority. All rights reserved.
             </div>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-[#C9A84C] transition">
+            <div className="flex flex-wrap justify-center gap-6 dmsans font-light">
+              <a href="#" className="hover:text-[var(--color-accent)] transition-colors duration-300">
                 Privacy Policy
               </a>
-              <a href="#" className="hover:text-[#C9A84C] transition">
+              <a href="#" className="hover:text-[var(--color-accent)] transition-colors duration-300">
                 Terms of Use
               </a>
-              <a href="#" className="hover:text-[#C9A84C] transition">
-                Accessibility
+              <a href="#" className="hover:text-[var(--color-accent)] transition-colors duration-300">
+                Accessibility Audit
               </a>
             </div>
           </div>
         </div>
+        
       </div>
     </footer>
   );
