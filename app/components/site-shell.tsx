@@ -2,6 +2,7 @@
 
 import { ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import { AuthButton } from "./auth-button";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -27,7 +28,7 @@ const routeActions = [
   {
     matches: ["/"],
     label: "Login for Officers",
-    href: "/generate",
+    href: "/signin",
     style: "outline" as const,
   },
 ];
@@ -81,16 +82,20 @@ export function SiteShell({ children }: { children: ReactNode }) {
             })}
           </nav>
 
-          <Link
-            href={action.href}
-            className={`shrink-0 rounded-xl px-3 py-2 text-xs font-medium transition-all sm:px-5 sm:py-2.5 sm:text-sm ${
-              action.style === "outline"
-                ? "border border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white"
-                : "bg-[#1B4332] text-white hover:bg-[#40916C]"
-            }`}
-          >
-            {action.label}
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href={action.href}
+              className={`shrink-0 rounded-xl px-3 py-2 text-xs font-medium transition-all sm:px-5 sm:py-2.5 sm:text-sm ${
+                action.style === "outline"
+                  ? "border border-[#1B4332] text-[#1B4332] hover:bg-[#1B4332] hover:text-white"
+                  : "bg-[#1B4332] text-white hover:bg-[#40916C]"
+              }`}
+            >
+              {action.label}
+            </Link>
+
+            <AuthButton />
+          </div>
         </div>
       </header>
       <main className="pt-24">{children}</main>
