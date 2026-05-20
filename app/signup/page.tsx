@@ -50,9 +50,26 @@ export default function SignUpPage() {
       if (result.error) {
         setFeedback({ type: "error", message: result.error.message });
       } else {
+        try {
+          await fetch("/api/officers/request", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email,
+              fullName,
+              designation,
+              department,
+              userId: result.data?.user?.id ?? null,
+              role: "officer",
+            }),
+          });
+        } catch {
+          // ignore request creation failures for now; auth user still exists
+        }
+
         setFeedback({
           type: "success",
-          message: "Verification email sent. After confirming your email, your request will go to the admin for approval.",
+          message: "Your request has been sent to admin for approval.",
         });
       }
     } catch (err: any) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Footer } from "@/components/ui/footer";
 import { getSupabaseClient } from "../../lib/supabaseClient";
@@ -104,6 +105,11 @@ export default function AdminPage() {
         if (!dashboardRes.ok) {
           throw new Error(dashboard?.error ?? "Failed to load admin dashboard.");
         }
+
+        // limit recent items to 6 for home view
+        if (dashboard?.pendingOfficers) dashboard.pendingOfficers = dashboard.pendingOfficers.slice(0, 6);
+        if (dashboard?.documentHistory) dashboard.documentHistory = dashboard.documentHistory.slice(0, 6);
+        if (dashboard?.loginHistory) dashboard.loginHistory = dashboard.loginHistory.slice(0, 6);
 
         setData(dashboard);
         setSelectedLogin(dashboard.loginHistory?.[0] ?? null);
@@ -233,6 +239,9 @@ export default function AdminPage() {
                   <p className="font-dm-sans text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)]">Approval Queue</p>
                   <h2 className="mt-2 font-playfair text-2xl font-bold text-[var(--color-deep)]">Pending officer requests</h2>
                 </div>
+                <div>
+                  <Link href="/admin/requests" className="text-sm font-semibold text-[var(--color-primary)]">See all</Link>
+                </div>
               </div>
 
               <div className="overflow-hidden rounded-2xl border border-[var(--color-border)]">
@@ -282,6 +291,9 @@ export default function AdminPage() {
                 <div>
                   <p className="font-dm-sans text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)]">Login Details</p>
                   <h2 className="mt-2 font-playfair text-2xl font-bold text-[var(--color-deep)]">Officer session info</h2>
+                </div>
+                <div>
+                  <Link href="/admin/logins" className="text-sm font-semibold text-[var(--color-primary)]">See all</Link>
                 </div>
               </div>
 
@@ -340,6 +352,9 @@ export default function AdminPage() {
               <div>
                 <p className="font-dm-sans text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-accent)]">Barcode History</p>
                 <h2 className="mt-2 font-playfair text-2xl font-bold text-[var(--color-deep)]">Who generated what</h2>
+              </div>
+              <div>
+                <Link href="/admin/documents" className="text-sm font-semibold text-[var(--color-primary)]">See all</Link>
               </div>
             </div>
 

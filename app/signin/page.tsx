@@ -26,7 +26,7 @@ export default function SignInPage() {
   async function logLogin(userId: string, status: string) {
     try {
       const userAgent = navigator.userAgent;
-      await fetch("/api/access/login-log", {
+      const resp = await fetch("/api/access/login-log", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -54,8 +54,14 @@ export default function SignInPage() {
           deviceType: /Mobi|Android|iPhone|iPad|iPod/i.test(userAgent) ? "Mobile" : "Desktop",
         }),
       });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => null);
+        console.error("login-log failed:", err ?? await resp.text());
+      }
     } catch {
-      // ignore logging errors
+      // ignore logging errors but surface to console for debugging
+      console.error("login-log request error");
     }
   }
 
@@ -72,20 +78,22 @@ export default function SignInPage() {
 
     const user = result.data?.user ?? null;
 
-    // If user's email is not confirmed (depends on Supabase settings), prevent login
-    const emailConfirmed = (user as any)?.email_confirmed_at || (user as any)?.confirmed_at;
-
-    if (!emailConfirmed) {
-      setFeedback({
-        type: "error",
-        message: "Please verify your email before signing in. Check your inbox for the confirmation email.",
-      });
-      // Sign out any created session to be safe
-      try {
-        await supabase.auth.signOut();
-      } catch {}
-      setLoading(false);
-      return;
+    // Ensure the officers table is linked to this auth user (set user_id)
+    try {
+      if (user?.id && user?.email) {
+        await fetch("/api/officers/complete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: user.id,
+            email: user.email,
+            fullName: (user.user_metadata ?? {})?.full_name ?? (user.user_metadata ?? {})?.fullName ?? undefined,
+          }),
+        });
+      }
+    } catch (e) {
+      // ignore linking failures; login flow continues
+      console.error("officers.complete linking failed:", e);
     }
 
     const response = await fetch(`/api/access/context?userId=${user.id}`);
@@ -106,7 +114,7 @@ export default function SignInPage() {
     if (context.isAdmin) {
       router.replace("/admin");
     } else if (context.canGenerate) {
-      router.replace("/generate");
+        router.replace("/home");
     } else {
       setFeedback({
         type: "success",

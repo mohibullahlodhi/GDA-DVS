@@ -59,7 +59,7 @@ export default function AuthCallbackPage() {
         const context = await response.json().catch(() => null);
 
         try {
-          await fetch("/api/access/login-log", {
+          const resp = await fetch("/api/access/login-log", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -68,8 +68,13 @@ export default function AuthCallbackPage() {
               userAgent: navigator.userAgent,
             }),
           });
-        } catch {
-          // ignore login log failures
+
+          if (!resp.ok) {
+            const err = await resp.json().catch(() => null);
+            console.error("login-log failed:", err ?? await resp.text());
+          }
+        } catch (e) {
+          console.error("login-log request error:", e);
         }
 
         if (context?.isAdmin) {
@@ -78,7 +83,7 @@ export default function AuthCallbackPage() {
         }
 
         if (context?.canGenerate) {
-          router.replace("/generate");
+          router.replace("/home");
           return;
         }
 

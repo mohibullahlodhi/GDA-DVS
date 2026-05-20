@@ -43,6 +43,7 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (!officer) {
+      console.error(`login-log: officer not found for userId=${userId}`);
       return NextResponse.json({ error: "Officer not found." }, { status: 404 });
     }
 
@@ -53,6 +54,11 @@ export async function POST(request: Request) {
       request.headers.get("x-real-ip") ??
       null;
 
+    // Ignore client-supplied browser/OS/device fields and derive them server-side
+    const resolvedBrowser = detectBrowser(userAgent);
+    const resolvedOS = detectOS(userAgent);
+    const resolvedDevice = detectDeviceType(userAgent);
+
     const { error } = await (supabaseAdmin.from("officer_logins") as any).insert({
       user_id: officer.user_id,
       email: officer.email,
@@ -60,16 +66,18 @@ export async function POST(request: Request) {
       role: officer.role ?? "officer",
       login_status: String(body.status ?? body.loginStatus ?? "approved"),
       ip_address: ipAddress,
-      browser: String(body.browser ?? detectBrowser(userAgent)),
-      operating_system: String(body.operatingSystem ?? detectOS(userAgent)),
-      device_type: String(body.deviceType ?? detectDeviceType(userAgent)),
+      browser: resolvedBrowser,
+      operating_system: resolvedOS,
+      device_type: resolvedDevice,
       user_agent: userAgent,
     });
 
     if (error) {
+      console.error("login-log: insert error", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    console.log(`login-log: recorded login for userId=${userId}`);
     return NextResponse.json({ ok: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to log login.";

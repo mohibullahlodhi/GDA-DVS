@@ -33,8 +33,7 @@ export async function GET(request: Request) {
     (supabaseAdmin.from("officers") as any)
       .select("id", { count: "exact", head: true })
       .eq("role", "officer")
-      .eq("approved", false)
-      .eq("confirmed", true),
+      .eq("approved", false),
     (supabaseAdmin.from("documents") as any).select("id", { count: "exact", head: true }),
     (supabaseAdmin.from("officer_logins") as any).select("id", { count: "exact", head: true }),
   ]);
@@ -43,7 +42,6 @@ export async function GET(request: Request) {
     .select(officerSelect)
     .eq("role", "officer")
     .eq("approved", false)
-    .eq("confirmed", true)
     .order("created_at", { ascending: false })
     .limit(20);
 

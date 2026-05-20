@@ -22,6 +22,7 @@ import { Footer } from "@/components/ui/footer";
 import { getSupabaseClient } from "../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { BackgroundPaths } from "@/components/ui/background-paths";
+import { OfficerAppbar } from "@/components/ui/officer-appbar";
 import type { ChangeEvent, DragEvent, FormEvent } from "react";
 
 type Department = "BCA" | "Education" | "Health" | "Police" | "Revenue" | "Transport";
@@ -83,6 +84,7 @@ export default function GenerateDocumentPage() {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [downloadName, setDownloadName] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState("");
   const barcodeCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const previewDocumentId = generatedDocument?.id ?? "GDA-XXXX-XXXX";
@@ -123,6 +125,7 @@ export default function GenerateDocumentPage() {
           return;
         }
 
+        setUserEmail(user.email ?? "");
         setCurrentUserId(user.id);
       } catch (err) {
         router.replace("/signin");
@@ -262,6 +265,7 @@ export default function GenerateDocumentPage() {
 
   return (
     <>
+      <OfficerAppbar email={userEmail} active="generate" />
       <div className="min-h-screen bg-[var(--color-bg)] pb-24 relative overflow-hidden">
         {/* PAGE HEADER */}
         <section className="bg-[#0B1F33] pb-28 pt-24 relative overflow-hidden">
